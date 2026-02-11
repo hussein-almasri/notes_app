@@ -16,6 +16,7 @@ class AuthService {
       return null;
     }
   }
+  // login
   Future<User?>loginWithEmailAndPassword(  String email,  String password)
   async {
     try {
@@ -27,5 +28,10 @@ class AuthService {
       return null;
     }
   }
+  //forgot password
+  Future<void> resetPassword(String email) async {
+  await _auth.sendPasswordResetEmail(email: email);
+}
+
 
 }

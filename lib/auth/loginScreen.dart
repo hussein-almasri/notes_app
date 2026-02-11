@@ -100,7 +100,8 @@ class _Loginscreen extends State<Loginscreen> {
             SizedBox(height: 7,),
             Container(
               alignment: Alignment.topRight,
-              child: TextButton(onPressed: (){}, child: 
+              child: TextButton(onPressed: _forgotPassword,
+               child: 
               Text('forgot password?',
               textAlign: TextAlign.right,
                style: TextStyle(
@@ -162,13 +163,56 @@ class _Loginscreen extends State<Loginscreen> {
         } else if (e.code == 'wrong-password') {
           _showMessage('Wrong password');
         }
-
     }
   }
+  void _forgotPassword() {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Reset Password'),
+              content: TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  hintText: 'Enter your email',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (_emailController.text.isEmpty) {
+                      _showMessage('Please enter your email');
+                      return;
+                    }
+
+                    try {
+                      await _authService.resetPassword(
+                        _emailController.text.trim(),
+                      );
+
+                      Navigator.pop(context);
+                      _showMessage('Password reset email sent 📧');
+
+                    } on FirebaseAuthException catch (e) {
+                      _showMessage(e.message ?? 'Something went wrong');
+                    }
+                  },
+                  child: const Text('Send'),
+                ),
+              ],
+            );
+          },
+        );
+      }
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
   }
 }
+
 
