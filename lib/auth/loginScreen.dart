@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/auth/RegisterScreeb.dart';
+import 'package:notes_app/auth/auth_service.dart';
 import 'package:notes_app/widgets/custom_text_field.dart';
 
 class Loginscreen extends StatefulWidget {
@@ -10,6 +12,9 @@ class Loginscreen extends StatefulWidget {
 }
 
 class _Loginscreen extends State<Loginscreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +78,7 @@ class _Loginscreen extends State<Loginscreen> {
             const SizedBox(height: 8),
             CustomTextField(
                 hint: 'Enter your email',
+                controller: _emailController,
               ),
 
             const SizedBox(height: 15),
@@ -88,6 +94,7 @@ class _Loginscreen extends State<Loginscreen> {
               CustomTextField(
                 hint: 'Enter your password',
                 isPassword: true,
+                controller: _passwordController,
               ),
 
             SizedBox(height: 7,),
@@ -111,7 +118,7 @@ class _Loginscreen extends State<Loginscreen> {
                   ),
                   color: Colors.orange,
                   textColor: Colors.white,
-                  onPressed: (){},
+                  onPressed: _login ,
                   child: Text('Login'),
                   ),
                   
@@ -121,7 +128,7 @@ class _Loginscreen extends State<Loginscreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text("Don't Have An Accont ?"),
-                           TextButton(onPressed: (){Navigator.push(context, MaterialPageRoute(builder: (context) => const Registerscreeb()));},
+                           TextButton(onPressed: (){Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Registerscreeb()));},
                            
                             child: 
                            Text('Register', textAlign: TextAlign.left, style: TextStyle(color: Colors.orange),)
@@ -132,39 +139,36 @@ class _Loginscreen extends State<Loginscreen> {
            ],
         ),
       ),
+    
+    );    
+  }
+  Future<void> _login() async {
+  if(_emailController .text.isEmpty || _passwordController.text.isEmpty){
+    _showMessage('Please fill all fields');
+    return;
+  }
+   // Registration logic will go here
+
+  try {
+      await _authService.loginWithEmailAndPassword(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+       
+      _showMessage('Login successful 🎉');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+          _showMessage('No user found for this email');
+        } else if (e.code == 'wrong-password') {
+          _showMessage('Wrong password');
+        }
+
+    }
+  }
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 }
-//   /// Reusable TextField
-//   Widget _buildTextField({
-//     required String hint,
-//     bool isPassword = false,
-//   }) {
-//     return TextFormField(
-//       obscureText: isPassword,
-//       decoration: InputDecoration(
-//         hintText: hint,
-//         hintStyle: const TextStyle(
-//           fontSize: 14,
-//           color: Color(0xFF9E9E9E),
-//         ),
-//         contentPadding:
-//             const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-//         filled: true,
-//         fillColor: const Color(0xFFF2F2F2),
-//         border: OutlineInputBorder(
-//           borderRadius: BorderRadius.circular(50),
-//           borderSide: const BorderSide(color: Color(0xFFD1D1D1)),
-//         ),
-//         enabledBorder: OutlineInputBorder(
-//           borderRadius: BorderRadius.circular(50),
-//           borderSide: const BorderSide(color: Color(0xFFD1D1D1)),
-//         ),
-//         focusedBorder: OutlineInputBorder(
-//           borderRadius: BorderRadius.circular(50),
-//           borderSide: const BorderSide(color: Color(0xFF9E9E9E)),
-//         ),
-//       ),
-//     );
-//   }
-// 
+
